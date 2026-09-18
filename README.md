@@ -9,7 +9,7 @@ dependencies. GitHub Pages serves it directly.
 ```
 index.html              the page            (generated — do not hand-edit)
 assets/css/site.css     design system       (generated — do not hand-edit)
-assets/css/custom.css   our own CSS         (hand-maintained)
+assets/css/custom.css   our own CSS + the reader  (hand-maintained)
 assets/fonts/           Barlow + Barlow Condensed, self-hosted
 assets/img/             portrait, photo strip, favicon
 papers/                 manuscript PDFs     -> papers/README.md
@@ -25,13 +25,21 @@ tools/check_papers.py   flags a PDF that is named wrong
 2. Put it in `papers/` — dragging it into the folder on github.com works fine.
 3. Commit.
 
-The **PDF** link appears under that paper's journal line on its own. `index.html`
-never has to change.
+That card gains two things on its own — a **Read paper** button and a **PDF**
+download link. `index.html` never has to change.
 
-Every PDF link ships hidden, and a short script at the bottom of `index.html` asks
-the server whether the file exists before revealing it. A paper that has not been
-uploaded shows no link at all rather than a broken one, so the site is always safe
-to hand to someone. The CV buttons work the same way.
+**Read paper** opens the PDF full screen over the site, so a reviewer can read the
+whole thing without being navigated away. Esc, the Close button or a click on the
+backdrop returns them exactly where they were. On a phone the PDF opens in the
+browser's own viewer instead: mobile browsers render PDFs in an embedded frame
+unreliably, and their native viewers are better. The same happens on a desktop
+browser that has inline PDF viewing turned off, usually by enterprise policy —
+better than a reader with an empty frame in it.
+
+All of this ships hidden. A short script at the bottom of `index.html` asks the
+server whether each file exists before revealing anything, so a paper that has not
+been uploaded shows no button, no link, and no clickable card — never a dead end.
+The CV buttons work the same way.
 
 If a filename is wrong the upload still succeeds and no link appears — silent and
 confusing. `tools/check_papers.py` exists to catch exactly that, and CI runs it on
@@ -41,6 +49,10 @@ Run it yourself any time:
 ```sh
 python3 tools/check_papers.py
 ```
+
+The reader's markup, styling and behaviour live in `tools/unbundle.py` and
+`assets/css/custom.css`, so a fresh export from Claude Design gets them back
+automatically.
 
 ### Adding a paper that is not in the list yet
 

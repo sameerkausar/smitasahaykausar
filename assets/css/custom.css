@@ -34,6 +34,150 @@
 }
 .pdf-a:hover { color: var(--color-accent-900); text-decoration: none; }
 
+/* The two affordances on a card whose PDF is present. */
+/* `hidden` is only a user-agent `display: none` rule, so any author `display`
+   declaration defeats it. Without this the actions show on every card, including
+   the ones whose PDF is not there. */
+.paper-actions[hidden] { display: none; }
+
+.paper-actions {
+  display: flex;
+  flex: 0 0 100%;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.paper-read {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-neutral-100);
+  background: var(--color-accent-800);
+  border: 0;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background-color .18s ease;
+}
+.paper-read::after { content: " \2197"; }          /* north-east arrow */
+.paper-read:hover { background: var(--color-accent-900); }
+
+/* A card with a readable PDF invites the click; one without stays inert. */
+[data-paper-ready] {
+  cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+[data-paper-ready]:hover {
+  border-color: var(--color-accent-800) !important;
+  box-shadow: 0 6px 20px rgb(18 35 58 / 13%);
+  transform: translateY(-2px);
+}
+[data-paper-ready]:focus-within {
+  border-color: var(--color-accent-800) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-paper-ready], .paper-read { transition: none; }
+  [data-paper-ready]:hover { transform: none; }
+}
+
+
+/* === Full-screen paper reader ============================================
+   Opened by clicking a publication card. The point is that a reviewer can
+   read the paper without being navigated away from the site. */
+
+html.reader-open { overflow: hidden; }              /* stop the page behind scrolling */
+
+.reader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-accent-900);
+}
+.reader[hidden] { display: none; }
+
+.reader-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 20px;
+  border-bottom: 1px solid color-mix(in srgb, #f5f5f8 20%, transparent);
+}
+
+.reader-heading { min-width: 0; }                   /* let the title truncate */
+
+.reader-venue {
+  margin: 0 0 3px;
+  font-family: var(--font-heading);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+}
+
+.reader-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.2;
+  color: var(--color-neutral-100);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reader-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+
+.reader-btn {
+  font-family: var(--font-heading);
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-100);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #f5f5f8 32%, transparent);
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+.reader-btn:hover {
+  background: color-mix(in srgb, #f5f5f8 14%, transparent);
+  border-color: color-mix(in srgb, #f5f5f8 55%, transparent);
+  color: var(--color-neutral-100);
+  text-decoration: none;
+}
+.reader-close {
+  background: var(--color-neutral-100);
+  color: var(--color-accent-900);
+  border-color: var(--color-neutral-100);
+}
+.reader-close:hover { background: #fff; color: var(--color-accent-900); }
+
+.reader-body { flex: 1; min-height: 0; background: var(--color-neutral-200); }
+
+.reader-frame { width: 100%; height: 100%; border: 0; display: block; }
+
+/* Keyboard focus has to stay obvious against the dark bar. */
+.reader-btn:focus-visible,
+.paper-read:focus-visible {
+  outline: 2px solid var(--color-neutral-100);
+  outline-offset: 2px;
+}
+
+/* Below this the reader is not used at all — the PDF opens natively — but the
+   bar still needs to survive a narrow window on a laptop. */
+@media (max-width: 860px) {
+  .reader-bar { padding: 12px 16px; gap: 14px; }
+  .reader-title { font-size: 16px; }
+  .reader-btn { padding: 7px 11px; font-size: 11.5px; }
+}
+
 
 /* === Responsive corrections ==============================================
    The export has no media queries at all; these are all ours. */
