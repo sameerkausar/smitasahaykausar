@@ -19,6 +19,7 @@
 <link rel="preload" href="assets/fonts/barlow-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/barlow-condensed-600-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/custom.css">
 <script>
 (function(){
   function init(){
@@ -962,17 +963,16 @@
 </div>
 
 <script>
-/* Publication and CV links reveal themselves only once the file is actually in the
-   repo, so a paper that has not been uploaded yet never shows a broken link.
-   To add one: drop the PDF into papers/ (or cv/) using the exact filename in the
-   href below, commit, and the link appears on its own. */
+/* Publication and CV links ship hidden and reveal themselves only once the file
+   is really in the repo, so a paper that has not been uploaded yet shows no link
+   instead of a broken one. To add a paper: put the PDF in papers/ under the name
+   tools/papers.json gives it, commit, and the link appears by itself. */
 (function () {
   var links = document.querySelectorAll('[data-pdf]');
   if (!links.length || typeof fetch !== 'function') { return; }
   Array.prototype.forEach.call(links, function (el) {
-    var href = el.tagName === 'A' ? el.getAttribute('href')
-                                  : el.querySelector('a').getAttribute('href');
-    fetch(href, { method: 'HEAD' })
+    var a = el.tagName === 'A' ? el : el.querySelector('a');
+    fetch(a.getAttribute('href'), { method: 'HEAD' })
       .then(function (r) {
         var type = r.headers.get('content-type') || '';
         if (r.ok && type.indexOf('html') === -1) { el.hidden = false; }

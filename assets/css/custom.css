@@ -1,0 +1,144 @@
+/* ===========================================================================
+   Hand-written additions and corrections.
+
+   assets/css/site.css is regenerated from each Claude Design export by
+   tools/unbundle.py, so anything written there is lost on the next rebuild.
+   This file is never regenerated. Everything we add by hand lives here.
+
+
+   The page is authored with inline styles, so most rules need !important to
+   win. Each one is keyed off the inline value it corrects, which keeps it
+   self-documenting and lets it survive a fresh export.
+
+   Do not edit index.html for styling.
+   =========================================================================== */
+
+/* === PDF links ============================================================
+   The "PDF" link under a publication's journal line, revealed by the script
+   at the bottom of index.html once the file exists in papers/. */
+
+/* .card-meta is a flex row, so give the link a full-width basis to put it on
+   its own line rather than squeezing it in beside the journal name. */
+.card-meta { flex-wrap: wrap; }
+.card-meta .pdf-link { flex: 0 0 100%; }
+
+.pdf-a {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-700);
+  border-bottom: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  padding-bottom: 1px;
+}
+.pdf-a:hover { color: var(--color-accent-900); text-decoration: none; }
+
+
+/* === Responsive corrections ==============================================
+   The export has no media queries at all; these are all ours. */
+
+/* --- 1. The About section's two-column grid ------------------------------
+   Authored as `minmax(300px,340px) minmax(0,1fr)`. Neither track can shrink
+   below 300px, so once the viewport drops under roughly 860px the second
+   track is squeezed to 0px and the entire About narrative and photo strip
+   render one character wide, overflowing the page. Collapse to one column. */
+@media (max-width: 860px) {
+  [style*="minmax(300px,340px)"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 32px !important;
+  }
+}
+
+/* --- 2. Grids that reserve more width than a phone has -------------------
+   `repeat(auto-fit, minmax(Npx, 1fr))` drops to a single column on its own,
+   but that column still claims Npx. Below Npx + 48px of section padding it
+   overflows, so let the track shrink. */
+@media (max-width: 480px) {
+  [style*="repeat(auto-fit,minmax(340px"],
+  [style*="repeat(auto-fit,minmax(320px"],
+  [style*="repeat(auto-fit,minmax(300px"],
+  [style*="repeat(auto-fit,minmax(280px"],
+  [style*="repeat(auto-fit,minmax(200px"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* --- 3. The five-photo strip in About ------------------------------------
+   Five tiles across a phone leaves each about 60px. Two rows of larger
+   thumbnails read far better. */
+@media (max-width: 700px) {
+  [style*="repeat(5,minmax(0,1fr))"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 380px) {
+  [style*="repeat(5,minmax(0,1fr))"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* --- 4. Nowrap text -------------------------------------------------------
+   Journal names, the institution line and several kickers are set to
+   `white-space: nowrap` to keep them tidy on a desktop. On a phone they are
+   the main source of sideways scroll. Wrapping is always better than
+   overflowing. */
+@media (max-width: 700px) {
+  [style*="white-space:nowrap"] {
+    white-space: normal !important;
+  }
+  /* Buttons are short enough to stay on one line and look wrong broken. */
+  a.btn[style*="white-space:nowrap"] {
+    white-space: nowrap !important;
+  }
+}
+
+/* --- 5. Date-gutter lists (talks, posters, positions) --------------------
+   An 86px fixed gutter is a large share of a 320px screen. */
+@media (max-width: 480px) {
+  [style*="grid-template-columns:86px 1fr"] {
+    grid-template-columns: 68px minmax(0, 1fr) !important;
+  }
+}
+
+/* --- 6. Breathing room ---------------------------------------------------
+   Trim the 24px section gutters and the large vertical padding on phones. */
+@media (max-width: 480px) {
+  section > div,
+  header > div,
+  footer > div {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+  section > div {
+    padding-top: 44px !important;
+    padding-bottom: 44px !important;
+  }
+}
+
+/* --- 7. Footer ----------------------------------------------------------
+   Two items justified apart collide on a narrow screen. */
+@media (max-width: 480px) {
+  footer > div {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+}
+
+/* --- 8. Last resort ------------------------------------------------------
+   A single long unbroken token (a DOI, a URL) should wrap rather than push
+   the page wide. */
+@media (max-width: 700px) {
+  body { overflow-wrap: break-word; }
+}
+
+/* --- 9. Anchor targets under the sticky header ---------------------------
+   The header stays fixed at the top, so a nav click scrolls the section
+   heading underneath it. On a phone the header wraps to two rows (~144px)
+   and the heading is hidden completely. Offset every anchor target by more
+   than the header's height. */
+section[id] { scroll-margin-top: 84px; }
+
+@media (max-width: 860px) {
+  section[id] { scroll-margin-top: 160px; }
+}
