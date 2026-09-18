@@ -41,9 +41,14 @@ pasting this just before that card's closing `</div>` in its `card-meta` line:
 ## Publishing with GitHub Pages
 
 1. In this repo on GitHub: **Settings → Pages**.
-2. **Source: Deploy from a branch**, branch `main`, folder `/ (root)`. Save.
+2. **Source: Deploy from a branch**, pick the branch holding this code, folder
+   `/ (root)`. Save.
 3. A minute later the site is live at
    `https://<username>.github.io/smitasahaykausar/`.
+
+The repository was empty before this commit, so whichever branch you want as the
+long-term home — `main` is the convention — set it under **Settings → General →
+Default branch** and point Pages at the same one.
 
 ### Using the smitasahaykausar.com domain
 
