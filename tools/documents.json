@@ -1,0 +1,243 @@
+{
+  "_comment": [
+    "Single source of truth for every PDF the site hosts.",
+    "",
+    "'match' is a distinctive phrase from the title as it appears on the page.",
+    "tools/unbundle.py uses it to find the right card or row and attach the PDF,",
+    "so the wiring survives a re-export even if the wording around it changes.",
+    "",
+    "To add one: drop the file in posters/ or papers/ under its slug + .pdf.",
+    "Nothing else. An entry with no file on disk simply shows nothing.",
+    "",
+    "posters/  presentations she made herself - posters, abstracts, slide decks.",
+    "          These are hers to post, so anything here can go up.",
+    "papers/   manuscripts. Only where the licence allows it: see papers/README.md.",
+    "          Everything else stays a DOI link, which is what the cards already do.",
+    "",
+    "'access' on a paper is documentation and drives papers/README.md.",
+    "'open' = open access, post the published PDF. 'restricted' = subscription,",
+    "accepted manuscript only. 'pending' = not accepted yet, post nothing."
+  ],
+  "cv": "cv/smita-sahay-kausar-cv.pdf",
+  "posters": [
+    {
+      "slug": "2026-version-9-staging-for-salivary",
+      "match": "Version 9 Staging for Salivary Gland Carcinoma",
+      "label": "Version 9 Staging for Salivary Gland Carcinoma",
+      "venue": "University of Michigan Medical School, Ann Arbor, MI, Jul 2026"
+    },
+    {
+      "slug": "2024-bioenergetic-dysfunction-in-schizophrenia-novel",
+      "match": "Bioenergetic Dysfunction in Schizophrenia: Novel",
+      "label": "Bioenergetic Dysfunction in Schizophrenia: Novel Findings and Treatment Approaches",
+      "venue": "CURESZ Foundation, University of Cincinnati, Cincinnati, OH, Feb 2024"
+    },
+    {
+      "slug": "2015-sca2-drug-repurposing",
+      "match": "SCA2 Drug Repurposing",
+      "label": "SCA2 Drug Repurposing",
+      "venue": "University of Utah School of Medicine, Salt Lake City, UT, Aug 2015"
+    },
+    {
+      "slug": "2027-occult-migrated-esophageal-foreign-body",
+      "match": "Occult Migrated Esophageal Foreign Body Presenti",
+      "label": "Occult Migrated Esophageal Foreign Body Presenting as a Pediatric Deep Neck Mass",
+      "venue": "ASPO-HNS Annual Meeting at COSM, Seattle, WA. , Apr 2027"
+    },
+    {
+      "slug": "2026-global-disparities-in-tracheostomy-care",
+      "match": "Global Disparities in Tracheostomy Care Delivery",
+      "label": "Global Disparities in Tracheostomy Care Delivery and Education",
+      "venue": "RUSH Otolaryngology Global Health Symposium, Chicago, IL, May 2026"
+    },
+    {
+      "slug": "2025-molecular-signatures-of-metabolic-stress",
+      "match": "Molecular Signatures of Metabolic Stress and Ket",
+      "label": "Molecular Signatures of Metabolic Stress and Ketogenic Therapies in Severe Mental Illness",
+      "venue": "Society of Biological Psychiatry Annual Meeting, Toronto, ON, Apr 2025"
+    },
+    {
+      "slug": "2025-sex-based-variations-and-metabolic",
+      "match": "Sex-Based Variations and Metabolic Patterns in M",
+      "label": "Sex-Based Variations and Metabolic Patterns in Mental Health Disorders: Findings from MIMIC-IV",
+      "venue": "Society of Biological Psychiatry Annual Meeting, Toronto, ON, Apr 2025"
+    },
+    {
+      "slug": "2025-transcranial-magnetic-stimulation-for-substance",
+      "match": "Transcranial Magnetic Stimulation for Substance ",
+      "label": "Transcranial Magnetic Stimulation for Substance Use Disorders",
+      "venue": "Neuroscience and Psychiatry Symposium, Toledo, OH, Feb 2025"
+    },
+    {
+      "slug": "2024-metabolic-insights-into-neuropsychiatric-illnesses",
+      "match": "Metabolic Insights into Neuropsychiatric Illness",
+      "label": "Metabolic Insights into Neuropsychiatric Illnesses and Ketogenic Therapies: A Transcriptomic View",
+      "venue": "Society for Neuroscience Annual Meeting, Chicago, IL, Oct 2024"
+    },
+    {
+      "slug": "2024-sex-specific-treatment-of-major",
+      "match": "Sex-Specific Treatment of Major Depressive Disor",
+      "label": "Sex-Specific Treatment of Major Depressive Disorder using Transcriptomic Profiling and LINCS analysis",
+      "venue": "Great Lakes Bioinformatics Annual Meeting, Pittsburgh, PA, May 2024"
+    },
+    {
+      "slug": "2024-towards-timely-alzheimers-diagnosis-a",
+      "match": "Towards timely Alzheimer’s diagnosis: a clinical",
+      "label": "Towards timely Alzheimer’s diagnosis: a clinical data-driven approach to biomarker discovery",
+      "venue": "American Academy of Neurology Annual Meeting, Denver, CO, Apr 2024"
+    },
+    {
+      "slug": "2024-purinergic-system-perturbations-in-schizophrenia",
+      "match": "Purinergic System Perturbations in Schizophrenia",
+      "label": "Purinergic System Perturbations in Schizophrenia",
+      "venue": "Graduate Research Annual Forum, Toledo, OH, Mar 2024"
+    },
+    {
+      "slug": "2024-advancing-the-detection-of-early",
+      "match": "Advancing the detection of early Alzheimer’s dis",
+      "label": "Advancing the detection of early Alzheimer’s disease via clinical data mining",
+      "venue": "Neuroscience and Psychiatry Symposium, Toledo, OH, Jan 2024"
+    },
+    {
+      "slug": "2023-revamping-the-mmi-enhancing-objectivity",
+      "match": "Revamping the MMI: Enhancing Objectivity through",
+      "label": "Revamping the MMI: Enhancing Objectivity through Integration of AAMC Core Competencies",
+      "venue": "AAMC Learn Serve Lead Annual Meeting, Seattle, WA, Nov 2023"
+    },
+    {
+      "slug": "2023-cell-subtype-changes-in-adenosine",
+      "match": "Cell-Subtype changes in Adenosine Receptor Expre",
+      "label": "Cell-Subtype changes in Adenosine Receptor Expression in Schizophrenia",
+      "venue": "Ohio Physiological Society Annual Meeting, Perrysburg, OH, Oct 2023"
+    },
+    {
+      "slug": "2023-connecting-the-dots-understanding-the",
+      "match": "Connecting the Dots: Understanding the Relations",
+      "label": "Connecting the Dots: Understanding the Relationship Between Social Determinants and Schizophrenia",
+      "venue": "Bioinformatics Symposium, Toledo, OH, May 2023"
+    },
+    {
+      "slug": "2021-perturbation-of-cell-subtype-specific",
+      "match": "Perturbation of Cell-Subtype Specific Active Kin",
+      "label": "Perturbation of Cell-Subtype Specific Active Kinome Networks in Schizophrenia",
+      "venue": "Society for Neuroscience, Chicago, IL, Nov 2021"
+    },
+    {
+      "slug": "2021-protein-kinase-a-expression-and",
+      "match": "Protein Kinase A Expression and Activity in Schi",
+      "label": "Protein Kinase A Expression and Activity in Schizophrenia",
+      "venue": "Society for Neuroscience, Chicago, IL, Nov 2021"
+    },
+    {
+      "slug": "2019-variant-calling-in-e-coli",
+      "match": "Variant Calling in E. coli",
+      "label": "Variant Calling in E. coli",
+      "venue": "Post-Baccalaureate Symposium, Hayward, CA, May 2019"
+    },
+    {
+      "slug": "2017-a-platform-for-the-detection",
+      "match": "A Platform for the Detection of HIV through Vira",
+      "label": "A Platform for the Detection of HIV through Viral Load Testing in Tijuana, Mexico",
+      "venue": "Undergraduate Research Symposium, La Jolla, CA, Mar 2017"
+    },
+    {
+      "slug": "2015-identifying-candidate-ataxin-2-inhibitors",
+      "match": "Identifying Candidate Ataxin-2 Inhibitors in Hig",
+      "label": "Identifying Candidate Ataxin-2 Inhibitors in High Throughput Screening Data using Molecular Descriptors",
+      "venue": "AMIA Translational Summit, San Francisco, CA, Jun 2015"
+    }
+  ],
+  "papers": [
+    {
+      "slug": "2026-pediatric-esophageal-foreign-body",
+      "match": "Pediatric Occult Esophageal Foreign Body",
+      "label": "Pediatric Occult Esophageal Foreign Body",
+      "venue": "Otolaryngology-Head and Neck Surgery, under review",
+      "access": "pending"
+    },
+    {
+      "slug": "2026-drugfindr",
+      "match": "drugfindR",
+      "label": "drugfindR",
+      "venue": "Bioconductor, 2026",
+      "access": "open"
+    },
+    {
+      "slug": "2025-ataxin2-sca2-machine-learning",
+      "match": "Ataxin-2 Inhibitors",
+      "label": "Ataxin-2 Inhibitors for SCA2",
+      "venue": "Biology, 2025",
+      "access": "open"
+    },
+    {
+      "slug": "2025-tms-substance-use-disorders",
+      "match": "Transcranial Magnetic Stimulation for precision therapy",
+      "label": "Neuroimaging-Guided TMS in Substance Use Disorders",
+      "venue": "Molecular Psychiatry, 2025",
+      "access": "restricted"
+    },
+    {
+      "slug": "2025-tracheostomy-global-survey",
+      "match": "Tracheostomy Management",
+      "label": "Education and Care Gaps in Tracheostomy Management",
+      "venue": "Tracheostomy Journal, 2025",
+      "access": "open"
+    },
+    {
+      "slug": "2025-purinergic-dlpfc-suicide-mdd",
+      "match": "Purinergic System Transcript Changes",
+      "label": "Purinergic System Transcript Changes in the DLPFC",
+      "venue": "International Journal of Molecular Sciences, 2025",
+      "access": "open"
+    },
+    {
+      "slug": "2024-akt-isotypes-schizophrenia",
+      "match": "AKT isotype expression",
+      "label": "Neuronal Alterations in AKT Isotype Expression",
+      "venue": "Molecular Psychiatry, 2024",
+      "access": "restricted"
+    },
+    {
+      "slug": "2024-ketogenic-neuropsychiatric-illness",
+      "match": "Ketogenic Thera",
+      "label": "Metabolic Insights and Ketogenic Therapies",
+      "venue": "International Journal of Molecular Sciences, 2024",
+      "access": "open"
+    },
+    {
+      "slug": "2024-wnt-signaling-dlpfc",
+      "match": "WNT Signaling Genes",
+      "label": "WNT Signaling Genes in the DLPFC",
+      "venue": "Brain Sciences, 2024",
+      "access": "open"
+    },
+    {
+      "slug": "2024-adenosine-receptors-schizophrenia",
+      "match": "Adenosine Receptor mRNA Expression",
+      "label": "Adenosine Receptor mRNA Expression",
+      "venue": "Cells, 2024",
+      "access": "open"
+    },
+    {
+      "slug": "2024-protein-kinase-a-schizophrenia",
+      "match": "Protein Kinase A in the Frontal Cortex",
+      "label": "Activity of Protein Kinase A in the Frontal Cortex",
+      "venue": "Brain Sciences, 2024",
+      "access": "open"
+    },
+    {
+      "slug": "2023-kaleidoscope",
+      "match": "Kaleidoscope",
+      "label": "Kaleidoscope",
+      "venue": "Journal of Bioinformatics & Systems Biology, 2023",
+      "access": "open"
+    },
+    {
+      "slug": "2025-dissertation-metabolic-perturbations",
+      "match": "Metabolic Perturbations in Severe Mental Illnesses",
+      "label": "Doctoral dissertation",
+      "venue": "OhioLINK ETD Center, 2025",
+      "access": "open"
+    }
+  ]
+}

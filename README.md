@@ -12,23 +12,34 @@ assets/css/site.css     design system       (generated — do not hand-edit)
 assets/css/custom.css   our own CSS + the reader  (hand-maintained)
 assets/fonts/           Barlow + Barlow Condensed, self-hosted
 assets/img/             portrait, photo strip, favicon
-papers/                 manuscript PDFs     -> papers/README.md
+posters/                posters and slide decks  -> posters/README.md
+papers/                 manuscript PDFs          -> papers/README.md
 cv/                     smita-sahay-kausar-cv.pdf
-tools/papers.json       which PDF belongs to which paper
+tools/documents.json    which PDF belongs to which card or row
 tools/unbundle.py       rebuilds the site from a Claude Design export
-tools/check_papers.py   flags a PDF that is named wrong
+tools/check_pdfs.py     flags a PDF that is named wrong
 ```
 
-## Adding a paper PDF
+## Adding a PDF
 
-1. Name the file exactly as [`papers/README.md`](papers/README.md) lists it.
-2. Put it in `papers/` — dragging it into the folder on github.com works fine.
+Two folders, because the rules differ:
+
+- **`posters/`** — posters, conference abstracts and slide decks. Hers outright, so
+  anything can go up. This is the main one. Adds a **View poster** link to the
+  matching row in Talks and Posters.
+- **`papers/`** — manuscripts. Only where the journal's licence allows it; see
+  [`papers/README.md`](papers/README.md). Everything else stays a DOI link, which
+  is what the cards already do. Adds a **Read paper** button to the card.
+
+Either way:
+
+1. Name the file exactly as that folder's README lists it.
+2. Put it in the folder — dragging it in on github.com works fine.
 3. Commit.
 
-That card gains two things on its own — a **Read paper** button and a **PDF**
-download link. `index.html` never has to change.
+The card or row wires itself up. `index.html` never has to change.
 
-**Read paper** opens the PDF full screen over the site, so a reviewer can read the
+Clicking it opens the PDF full screen over the site, so a reviewer can read the
 whole thing without being navigated away. Esc, the Close button or a click on the
 backdrop returns them exactly where they were. On a phone the PDF opens in the
 browser's own viewer instead: mobile browsers render PDFs in an embedded frame
@@ -42,23 +53,23 @@ been uploaded shows no button, no link, and no clickable card — never a dead e
 The CV buttons work the same way.
 
 If a filename is wrong the upload still succeeds and no link appears — silent and
-confusing. `tools/check_papers.py` exists to catch exactly that, and CI runs it on
+confusing. `tools/check_pdfs.py` exists to catch exactly that, and CI runs it on
 every push, so a typo shows up as a failed check that names the correct filename.
 Run it yourself any time:
 
 ```sh
-python3 tools/check_papers.py
+python3 tools/check_pdfs.py
 ```
 
 The reader's markup, styling and behaviour live in `tools/unbundle.py` and
 `assets/css/custom.css`, so a fresh export from Claude Design gets them back
 automatically.
 
-### Adding a paper that is not in the list yet
+### Adding something that is not in the list yet
 
-Add an entry to [`tools/papers.json`](tools/papers.json) — `slug` is the filename,
-`match` is a distinctive phrase from the publication's title as it appears on the
-page — then rerun `tools/unbundle.py` (below). It wires the link and regenerates
+Add an entry to [`tools/documents.json`](tools/documents.json) under `posters` or
+`papers` — `slug` is the filename, `match` is a distinctive phrase from the title
+as it appears on the page — then rerun `tools/unbundle.py` (below). It wires the link and regenerates
 `papers/README.md`.
 
 ## Updating the design
@@ -74,7 +85,7 @@ python3 tools/unbundle.py ~/Downloads/new-export.html
 ```
 
 It rewrites `index.html`, `assets/css/site.css`, `assets/fonts/` and `assets/img/`,
-and leaves `custom.css`, `papers/`, `cv/` and `tools/` alone. Check what changed
+and leaves `custom.css`, `posters/`, `papers/`, `cv/` and `tools/` alone. Check what changed
 with `git diff`, preview locally, then commit.
 
 So: **design changes go through Claude Design and a rebuild. Styling fixes go in

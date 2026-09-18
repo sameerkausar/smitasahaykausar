@@ -5,7 +5,7 @@ the Research section as soon as the file is here — no HTML editing, ever.
 
 The filename has to match exactly: all lowercase, hyphens, `.pdf`.
 
-> This file is generated from `tools/papers.json` by `tools/unbundle.py`.
+> This file is generated from `tools/documents.json` by `tools/unbundle.py`.
 > To add a paper, add an entry there rather than editing this table.
 
 | Publication | Venue | Filename | Posting it |

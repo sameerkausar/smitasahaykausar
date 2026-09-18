@@ -63,23 +63,59 @@
 .paper-read::after { content: " \2197"; }          /* north-east arrow */
 .paper-read:hover { background: var(--color-accent-900); }
 
-/* A card with a readable PDF invites the click; one without stays inert. */
-[data-paper-ready] {
+/* A publication card with a readable PDF invites the click; one without is
+   left exactly as it was. */
+article.card[data-paper-ready] {
   cursor: pointer;
   transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
-[data-paper-ready]:hover {
+article.card[data-paper-ready]:hover {
   border-color: var(--color-accent-800) !important;
   box-shadow: 0 6px 20px rgb(18 35 58 / 13%);
   transform: translateY(-2px);
 }
-[data-paper-ready]:focus-within {
+article.card[data-paper-ready]:focus-within {
   border-color: var(--color-accent-800) !important;
 }
 
+
+/* === Posters ==============================================================
+   Rows in Talks and Posters whose presentation PDF is hosted. These are
+   compact list rows rather than cards, so the treatment is quieter: a tinted
+   band on hover and a small link under the venue. */
+
+.poster-actions[hidden] { display: none; }        /* see the note above */
+.poster-actions { margin-top: 5px; }
+
+.poster-a {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-700);
+  border-bottom: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  padding-bottom: 1px;
+}
+.poster-a::after { content: " \2197"; }
+.poster-a:hover { color: var(--color-accent-900); text-decoration: none; }
+
+.talk-row[data-paper-ready] {
+  cursor: pointer;
+  /* Pull the tint into the row's own gutters without shifting the text. */
+  margin-inline: -12px;
+  padding-inline: 12px;
+  transition: background-color .18s ease;
+}
+.talk-row[data-paper-ready]:hover,
+.talk-row[data-paper-ready]:focus-within {
+  background: color-mix(in srgb, var(--color-accent-700) 7%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [data-paper-ready], .paper-read { transition: none; }
-  [data-paper-ready]:hover { transform: none; }
+  article.card[data-paper-ready],
+  .talk-row[data-paper-ready],
+  .paper-read { transition: none; }
+  article.card[data-paper-ready]:hover { transform: none; }
 }
 
 

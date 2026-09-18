@@ -1,0 +1,18 @@
+name: Check PDF filenames
+
+# A PDF whose filename does not match tools/documents.json uploads without error
+# and is simply never linked. This makes that mistake visible instead of silent.
+
+on:
+  push:
+    paths: ['posters/**', 'papers/**', 'cv/**', 'tools/documents.json']
+  pull_request:
+    paths: ['posters/**', 'papers/**', 'cv/**', 'tools/documents.json']
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/check_pdfs.py

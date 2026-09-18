@@ -7,7 +7,7 @@ element that a bundled React runtime renders at load time. That file cannot be
 served or edited sensibly, so this script unpacks it into plain static files and
 re-applies everything the export does not carry:
 
-  * the PDF links on each publication card, from tools/papers.json
+  * the PDF links on each publication card, from tools/documents.json
   * the CV links on the hero and contact buttons
   * the <link> to assets/css/custom.css, which is hand-maintained
   * page title, description, canonical and Open Graph tags
@@ -83,7 +83,7 @@ REVEAL_SCRIPT = """<script>
       Each distinct file is probed once with a HEAD request and revealed only if
       it is really there, so a paper that has not been uploaded yet shows no
       link and no clickable card instead of a dead end. To add a paper: put the
-      PDF in papers/ under the name tools/papers.json gives it, commit, done.
+      PDF in papers/ under the name tools/documents.json gives it, commit, done.
 
    2. The reader. A card whose PDF exists opens it full screen, so a reviewer
       can read the whole paper without being thrown out to another site.
@@ -289,6 +289,77 @@ def carve_body(template):
     return sticky, body
 
 
+ROW_MARKER = '<div style="display:grid;grid-template-columns:86px 1fr'
+
+
+def _element_end(text, start):
+    """Index just past the <div> opening at `start`, matching nesting."""
+    depth = 0
+    for m in re.finditer(r"<div\b|</div>", text[start:]):
+        depth += 1 if m.group(0) != "</div>" else -1
+        if depth == 0:
+            return start + m.end()
+    return None
+
+
+def wire_posters(body, posters):
+    """Attach a hidden poster PDF to each talks-and-posters row named in the config.
+
+    Same contract as the publication cards: the row carries the reader's data
+    attributes and an affordance that stays hidden until the reveal probe
+    confirms the file is really there.
+    """
+    used, count = set(), 0
+    edits = []          # (start, end, new_text), applied back to front
+
+    pos = 0
+    while True:
+        start = body.find(ROW_MARKER, pos)
+        if start < 0:
+            break
+        end = _element_end(body, start)
+        if end is None:
+            break
+        pos = end
+        row = body[start:end]
+
+        m = re.search(r'font-size:16px;line-height:1\.45">([^<]*)<', row)
+        if not m:
+            continue
+        title = html.unescape(m.group(1)).strip()
+
+        entry = next((p for p in posters
+                      if p["match"].lower() in title.lower() and p["slug"] not in used), None)
+        if not entry:
+            continue
+        used.add(entry["slug"])
+        count += 1
+        pdf = "posters/%s.pdf" % entry["slug"]
+
+        affordance = ('<div class="poster-actions" data-pdf hidden>'
+                      '<a href="%s" class="poster-a">View poster</a></div>' % pdf)
+        # The row is [date cell][content cell]; put the affordance at the end of
+        # the content cell so it sits under the venue rather than in the gutter.
+        insert_at = row.rindex("</div>", 0, row.rindex("</div>"))
+        new_row = row[:insert_at] + affordance + row[insert_at:]
+        new_row = new_row.replace(
+            ROW_MARKER,
+            '<div class="talk-row" data-paper-pdf="%s" data-paper-title="%s" '
+            'data-paper-venue="%s" style="display:grid;grid-template-columns:86px 1fr'
+            % (pdf, html.escape(title, quote=True),
+               html.escape(entry.get("venue", ""), quote=True)),
+            1)
+        edits.append((start, end, new_row))
+
+    for start, end, new_row in reversed(edits):
+        body = body[:start] + new_row + body[end:]
+
+    for p in posters:
+        if p["slug"] not in used:
+            print("   warning: poster entry %r matched no row on the page" % p["slug"])
+    return body, count
+
+
 def wire_pdf_links(body, papers, cv_path):
     """Attach a hidden PDF link to each publication card named in papers.json."""
     cards = list(re.finditer(r'<article class="card".*?</article>', body, re.S))
@@ -328,7 +399,7 @@ def wire_pdf_links(body, papers, cv_path):
                    html.escape(entry.get("venue", ""), quote=True)),
                 1)
         elif title:
-            print("   note: no papers.json entry for card %r" % title[:64])
+            print("   note: no documents.json entry for card %r" % title[:64])
         out.append(body[cursor:c.start()] + card)
         cursor = c.end()
     out.append(body[cursor:])
@@ -404,7 +475,7 @@ the Research section as soon as the file is here — no HTML editing, ever.
 
 The filename has to match exactly: all lowercase, hyphens, `.pdf`.
 
-> This file is generated from `tools/papers.json` by `tools/unbundle.py`.
+> This file is generated from `tools/documents.json` by `tools/unbundle.py`.
 > To add a paper, add an entry there rather than editing this table.
 
 | Publication | Venue | Filename | Posting it |
@@ -441,8 +512,8 @@ def main():
     if not os.path.isfile(export):
         fail("no such file: " + export)
 
-    config = json.load(open(os.path.join(ROOT, "tools/papers.json"), encoding="utf-8"))
-    papers, cv_path = config["papers"], config["cv"]
+    config = json.load(open(os.path.join(ROOT, "tools/documents.json"), encoding="utf-8"))
+    papers, posters, cv_path = config["papers"], config["posters"], config["cv"]
 
     manifest, template = read_bundle(export)
     template, n_img = write_images(manifest, template)
@@ -450,6 +521,7 @@ def main():
     n_css = write_css(template)
     sticky, body = carve_body(template)
     body, n_pdf, n_cv = wire_pdf_links(body, papers, cv_path)
+    body, n_poster = wire_posters(body, posters)
 
     if "x-dc" in body or "__bundler" in body:
         fail("bundler scaffolding survived into the page body")
@@ -462,7 +534,8 @@ def main():
     print("  %2d images   -> assets/img/" % n_img)
     print("  %2d fonts    -> assets/fonts/" % n_font)
     print("  %2d bytes    -> assets/css/site.css" % n_css)
-    print("  %2d PDF links wired, %d CV buttons" % (n_pdf, n_cv))
+    print("  %2d paper slots, %d poster slots, %d CV buttons"
+          % (n_pdf, n_poster, n_cv))
     print("  regenerated papers/README.md")
     print("\ncustom.css, papers/ and cv/ were left untouched.")
 
