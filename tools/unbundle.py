@@ -421,6 +421,49 @@ def wire_pdf_links(body, papers, cv_path):
     return body, len(matched), n_cv
 
 
+def open_links_in_new_tab(body):
+    """Send every link that leaves the page to a new tab.
+
+    Two kinds qualify. Anything on another origin -- the DOI line on a
+    publication card, the Abstract and Poster records under talks, the
+    articles, the profile links -- and the two CV buttons, which point at a
+    PDF that would otherwise replace the site with a document and leave no
+    way back but the back button.
+
+    rel="noopener noreferrer" goes on with it. Without noopener the opened
+    page gets a handle on ours through window.opener and can navigate it
+    somewhere else while the reader is looking away, which is worth closing
+    off even for a DOI resolver.
+
+    Not touched: in-page anchors, and the "View poster" and "PDF" links,
+    which the reader and the download attribute already handle.
+
+    Done here rather than in custom.css because target is an attribute and
+    CSS cannot set one, and index.html is regenerated from each export --
+    a hand edit would not survive the next rebuild.
+    """
+    n = 0
+
+    def add(m):
+        nonlocal n
+        attrs = m.group(1)
+        if "target=" in attrs:
+            return m.group(0)
+        href = re.search(r'href="([^"]*)"', attrs)
+        if not href:
+            return m.group(0)
+        target = href.group(1)
+        external = target.startswith(("http://", "https://"))
+        is_cv = target.startswith("cv/")
+        if not (external or is_cv):
+            return m.group(0)
+        n += 1
+        return "<a%s target=\"_blank\" rel=\"noopener noreferrer\">" % attrs.rstrip()
+
+    body = re.sub(r"<a\b([^>]*)>", add, body)
+    return body, n
+
+
 def build_document(sticky, body):
     return """<!DOCTYPE html>
 <html lang="en">
@@ -522,6 +565,7 @@ def main():
     sticky, body = carve_body(template)
     body, n_pdf, n_cv = wire_pdf_links(body, papers, cv_path)
     body, n_poster = wire_posters(body, posters)
+    body, n_tab = open_links_in_new_tab(body)
 
     if "x-dc" in body or "__bundler" in body:
         fail("bundler scaffolding survived into the page body")
@@ -536,6 +580,7 @@ def main():
     print("  %2d bytes    -> assets/css/site.css" % n_css)
     print("  %2d paper slots, %d poster slots, %d CV buttons"
           % (n_pdf, n_poster, n_cv))
+    print("  %2d links open in a new tab" % n_tab)
     print("  regenerated papers/README.md")
     print("\ncustom.css, papers/ and cv/ were left untouched.")
 
