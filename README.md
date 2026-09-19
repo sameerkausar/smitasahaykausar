@@ -61,6 +61,21 @@ Run it yourself any time:
 python3 tools/check_pdfs.py
 ```
 
+### After uploading, stamp the titles
+
+A browser names a PDF tab from the file's own `/Title`, not from its filename.
+Posters exported from PowerPoint arrive carrying the template's title and the
+template author's name — one of Smita's opened as *"BMI PowerPoint Presentation
+48x36"* by *"Martin Cryer & Anthony Wong"*.
+
+```sh
+python3 tools/pdf_titles.py          # report what would change
+python3 tools/pdf_titles.py --write  # apply it
+```
+
+It takes the title from `tools/documents.json`, the same source the page uses for
+the link, sets the author to her, and copies the pages through untouched.
+
 The reader's markup, styling and behaviour live in `tools/unbundle.py` and
 `assets/css/custom.css`, so a fresh export from Claude Design gets them back
 automatically.
