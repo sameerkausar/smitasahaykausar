@@ -180,11 +180,17 @@ a[href^="http"]:not(.btn):hover { color: var(--color-accent-900); }
    `white-space:nowrap`, inline on a span inside the link. Uppercasing the
    text and opening the letter-spacing made it wider than that clamp had
    budgeted for, and nowrap turned the excess into sideways scroll -- 17px at
-   768 and 31px at 1024. Releasing the nowrap lets the clamp do its job
-   again: the name still fits on one line, now at the smaller end of its own
-   range, and the face stays the same as the poster links'. !important
-   because the declaration it overrides is inline. */
-a[href^="http"]:not(.btn) [style*="white-space:nowrap"] {
+   768 and 31px at 1024.
+
+   Only the three longest journal names carry that span; every other link is
+   plain text and takes the 12px above. So the clamp was also the reason the
+   journal lines came out at two different sizes -- "Brain Sciences, 2024" at
+   the clamp's 14.5px ceiling next to "Cells, 2024" at 12px. Dropping both
+   declarations makes every outbound link one size and lets a long name wrap
+   instead of scrolling the page sideways. !important because what they
+   override is inline. */
+a[href^="http"]:not(.btn) [style*="font-size:clamp"] {
+  font-size: inherit !important;
   white-space: normal !important;
 }
 
