@@ -97,20 +97,40 @@ discards them.
 1. **Settings → Pages**.
 2. **Source: Deploy from a branch**, branch `main`, folder `/ (root)`. Save.
 3. A minute later the site is live at
-   `https://<username>.github.io/smitasahaykausar/`.
+   `https://sameerkausar.github.io/smitasahaykausar/`.
 
 ### Using the smitasahaykausar.com domain
 
-The footer and social-preview tags already point there. To make it real:
+The footer and social-preview tags already point there, and the `CNAME` file at
+the repo root claims the domain for this repo. What is left is DNS and the
+Pages setting.
 
-1. At the registrar, add:
-   - `A` records for `@` → `185.199.108.153`, `185.199.109.153`,
-     `185.199.110.153`, `185.199.111.153`
-   - `CNAME` for `www` → `<username>.github.io`
-2. Add a file named `CNAME` at the repo root containing one line:
-   `smitasahaykausar.com`
-3. **Settings → Pages → Custom domain**, enter it, and tick **Enforce HTTPS**
-   once the certificate is issued.
+The domain is registered at Squarespace. In **Squarespace → Domains →
+smitasahaykausar.com → DNS → DNS Settings**, delete the parking records
+Squarespace adds by default (the `@` A records pointing at Squarespace and any
+`www` CNAME pointing at a Squarespace host), then add:
+
+| Host  | Type    | Value                  |
+| ----- | ------- | ---------------------- |
+| `@`   | `A`     | `185.199.108.153`      |
+| `@`   | `A`     | `185.199.109.153`      |
+| `@`   | `A`     | `185.199.110.153`      |
+| `@`   | `A`     | `185.199.111.153`      |
+| `@`   | `AAAA`  | `2606:50c0:8000::153`  |
+| `@`   | `AAAA`  | `2606:50c0:8001::153`  |
+| `@`   | `AAAA`  | `2606:50c0:8002::153`  |
+| `@`   | `AAAA`  | `2606:50c0:8003::153`  |
+| `www` | `CNAME` | `sameerkausar.github.io.` |
+
+Leave the `MX` and any mail-related records alone — they are email, not the
+website.
+
+Then in **Settings → Pages → Custom domain** enter `smitasahaykausar.com`,
+Save, and once GitHub finishes the DNS check and issues the certificate, tick
+**Enforce HTTPS**. GitHub redirects `www` to the apex on its own.
+
+Propagation is usually minutes and occasionally a few hours. Until the
+certificate is issued, HTTPS will warn — that is normal, not a misconfiguration.
 
 ## Previewing locally
 
