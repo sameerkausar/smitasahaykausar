@@ -38,6 +38,23 @@ PAGE_DESC = (
     "pursuing otolaryngology-head and neck surgery."
 )
 
+# Profile URLs that changed after the export was made. The page is built in
+# Claude Design, so the only other way to correct one is a fresh export, and
+# the URL is a fact about her rather than a design decision -- it does not
+# belong in a design tool's undo history.
+#
+# Each entry should be temporary. When Smita next edits the page in Claude
+# Design she should fix the link at source too, and then the entry here can
+# go. Leaving it costs nothing but hides the drift, so the build prints every
+# substitution it makes.
+LINK_FIXES = {
+    # The vanity URL replaced the auto-generated one with the ID suffix. The
+    # old address still redirects, but sameAs in the Person schema should
+    # claim the address LinkedIn itself calls canonical.
+    "https://www.linkedin.com/in/smita-sahay-kausar-b8041ba9":
+        "https://www.linkedin.com/in/smita-sahay-kausar/",
+}
+
 # Stable names for the photographs, keyed by their alt text in the export. An
 # image whose alt text is not listed here keeps a name derived from that text.
 IMG_NAMES = {
@@ -452,10 +469,10 @@ def regroup_row_links(body):
     actions row -- abstract first, then poster -- and gives it the same class
     the poster link wears so the two match.
 
-    "Abstract" becomes "View abstract" to read alongside "View poster". Any
-    other label is left exactly as it is: the one row carrying an external
-    "Poster" record as well as a hosted PDF would read "Poster / View poster",
-    which needs a naming decision rather than a guess.
+    "Abstract" becomes "View abstract" to read alongside "View poster", and
+    "Poster" becomes "View poster (DOI)": that one points at the published
+    F1000Research record of a poster we also host, so the qualifier says
+    which is the citation and which is the file.
 
     The poster half keeps its own hidden wrapper, so a row with an abstract
     and no uploaded poster shows one link and no empty gap.
@@ -484,7 +501,17 @@ def regroup_row_links(body):
             continue
 
         open_tag, label = m.group(1), re.sub(r"<[^>]+>", "", m.group(2)).strip()
-        if label.lower() == "abstract":
+
+        # A gutter link labelled "Poster" points at the published record of the
+        # same poster we host ourselves -- the F1000Research entry for the
+        # Sex-Specific MDD row, which carries a citable DOI. On its own,
+        # "Poster" next to "View poster" asks the reader to guess which is
+        # which. The qualifier keeps the record and says what it is: the
+        # citation lives there, the file is ours.
+        if label.lower() == "poster":
+            label = "View poster (DOI)"
+            renamed += 1
+        elif label.lower() == "abstract":
             label = "View abstract"
             renamed += 1
         # Drop the inline colour so .poster-a and the outbound-link rule win.
@@ -549,6 +576,24 @@ def open_links_in_new_tab(body):
 
     body = re.sub(r"<a\b([^>]*)>", add, body)
     return body, n
+
+
+def fix_links(body):
+    """Apply LINK_FIXES to the page before anything reads a URL out of it.
+
+    Runs before person_schema, which builds sameAs from the rendered links, so
+    a corrected profile URL reaches the structured data too.
+    """
+    total = 0
+    for old, new in LINK_FIXES.items():
+        n = body.count(old)
+        if not n:
+            print("   note: LINK_FIXES entry no longer matches the page: %s" % old)
+            continue
+        body = body.replace(old, new)
+        total += n
+        print("   %d link(s) rewritten -> %s" % (n, new))
+    return body, total
 
 
 def person_schema(body):
@@ -726,6 +771,7 @@ def main():
     body, n_pdf, n_cv = wire_pdf_links(body, papers, cv_path)
     body, n_poster = wire_posters(body, posters)
     body, n_moved, n_renamed = regroup_row_links(body)
+    body, _ = fix_links(body)
     body, n_tab = open_links_in_new_tab(body)
 
     if "x-dc" in body or "__bundler" in body:
