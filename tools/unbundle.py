@@ -31,7 +31,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SITE_URL = "https://smitasahaykausar.com/"
-PAGE_TITLE = "Smita Sahay-Kausar, M.D. Candidate, Ph.D."
+PAGE_TITLE = "Smita Sahay-Kausar, Ph.D."
 PAGE_DESC = (
     "Smita Sahay-Kausar, M.D. candidate and Ph.D. in neuroscience at the University "
     "of Toledo College of Medicine and Life Sciences. Physician-scientist in training "

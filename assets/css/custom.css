@@ -175,6 +175,19 @@ a[href^="http"]:not(.btn) {
 }
 a[href^="http"]:not(.btn):hover { color: var(--color-accent-900); }
 
+/* The export fits a long journal name by shrinking it with a container-query
+   font size and pinning it to one line: `clamp(11px,4.6cqi,14.5px)` plus
+   `white-space:nowrap`, inline on a span inside the link. Uppercasing the
+   text and opening the letter-spacing made it wider than that clamp had
+   budgeted for, and nowrap turned the excess into sideways scroll -- 17px at
+   768 and 31px at 1024. Releasing the nowrap lets the clamp do its job
+   again: the name still fits on one line, now at the smaller end of its own
+   range, and the face stays the same as the poster links'. !important
+   because the declaration it overrides is inline. */
+a[href^="http"]:not(.btn) [style*="white-space:nowrap"] {
+  white-space: normal !important;
+}
+
 a[href^="http"]:not(.btn)::after { content: "\00A0\2197"; }
 
 /* A no-break space so the arrow cannot be orphaned onto its own line, and
@@ -348,6 +361,33 @@ html.reader-open { overflow: hidden; }              /* stop the page behind scro
   a.btn[style*="white-space:nowrap"] {
     white-space: nowrap !important;
   }
+}
+
+/* --- 4b. Header brand, and the contact label/value rows -------------------
+   The header bar is one flex row that wraps on a phone: the brand takes the
+   first line and the nav the second. space-between leaves the brand hard
+   against the left edge while the nav below it centres, which reads as a
+   mistake rather than a choice. Centring the whole bar lines the two up.
+
+   The contact rows are label-and-value pairs laid out with space-between and
+   no gap. On a wide screen the two ends are far apart; on a phone the value
+   grows until it touches the label -- "InstitutionUniversity of Toledo...".
+   Stacking them puts the value on its own line with room to wrap. */
+@media (max-width: 700px) {
+  header > div[style*="justify-content:space-between"] {
+    justify-content: center !important;
+  }
+
+  div[style*="justify-content:space-between"][style*="padding-bottom:10px"] {
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
+/* A gap at every width, so the pair can never close up even before the
+   stacking kicks in. */
+div[style*="justify-content:space-between"][style*="padding-bottom:10px"] {
+  gap: 4px 24px;
 }
 
 /* --- 5. Date-gutter lists (talks, posters, positions) --------------------
