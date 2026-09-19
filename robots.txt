@@ -1,0 +1,5 @@
+# Everything here is meant to be found: the page, the CV, the posters.
+User-agent: *
+Allow: /
+
+Sitemap: https://smitasahaykausar.com/sitemap.xml
