@@ -119,6 +119,38 @@ article.card[data-paper-ready]:focus-within {
 }
 
 
+/* === Outbound links =======================================================
+   Every link that leaves the site gets the same north-east arrow the poster
+   and paper links carry, so a reader can tell at a glance what is a link.
+   Matched on the href rather than a class, because index.html is generated
+   from the Claude Design export and these links carry no class of their own;
+   an attribute selector keeps working when the page is rebuilt.
+
+   Relative links are not matched, so the reader's own controls and the
+   "View poster" / "Read paper" links -- which point at files in posters/ and
+   papers/ -- keep the single arrow they already had and never get a second. */
+
+a[href^="http"]:not(.btn)::after { content: "\00A0\2197"; }
+
+/* A no-break space so the arrow cannot be orphaned onto its own line, and
+   an empty alt string so screen readers do not announce "north east arrow"
+   after every link. The pair is deliberate: a browser without support for
+   the alt syntax drops the second rule as invalid and keeps the first. */
+a[href^="http"]:not(.btn)::after { content: "\00A0\2197" / ""; }
+
+/* mailto: and tel: are left alone -- the arrow conventionally means "opens
+   elsewhere on the web", and the address is already self-evidently an
+   address.
+
+   .btn is excluded for two reasons. A filled button already reads as
+   something you click, so the arrow earns less there than on an inline text
+   link. And the hero and contact rows sit next to "Get in touch", an
+   internal anchor that would never take an arrow -- marking its three
+   neighbours and not it would look like an oversight rather than a
+   distinction. Those rows are also flex-nowrap with a container-query font
+   size and already ran 7px over at 320px; three arrows pushed that to 35. */
+
+
 /* === Full-screen paper reader ============================================
    Opened by clicking a publication card. The point is that a reviewer can
    read the paper without being navigated away from the site. */
