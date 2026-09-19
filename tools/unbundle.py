@@ -38,6 +38,23 @@ PAGE_DESC = (
     "pursuing otolaryngology-head and neck surgery."
 )
 
+# Profile URLs that changed after the export was made. The page is built in
+# Claude Design, so the only other way to correct one is a fresh export, and
+# the URL is a fact about her rather than a design decision -- it does not
+# belong in a design tool's undo history.
+#
+# Each entry should be temporary. When Smita next edits the page in Claude
+# Design she should fix the link at source too, and then the entry here can
+# go. Leaving it costs nothing but hides the drift, so the build prints every
+# substitution it makes.
+LINK_FIXES = {
+    # The vanity URL replaced the auto-generated one with the ID suffix. The
+    # old address still redirects, but sameAs in the Person schema should
+    # claim the address LinkedIn itself calls canonical.
+    "https://www.linkedin.com/in/smita-sahay-kausar-b8041ba9":
+        "https://www.linkedin.com/in/smita-sahay-kausar/",
+}
+
 # Stable names for the photographs, keyed by their alt text in the export. An
 # image whose alt text is not listed here keeps a name derived from that text.
 IMG_NAMES = {
@@ -561,6 +578,24 @@ def open_links_in_new_tab(body):
     return body, n
 
 
+def fix_links(body):
+    """Apply LINK_FIXES to the page before anything reads a URL out of it.
+
+    Runs before person_schema, which builds sameAs from the rendered links, so
+    a corrected profile URL reaches the structured data too.
+    """
+    total = 0
+    for old, new in LINK_FIXES.items():
+        n = body.count(old)
+        if not n:
+            print("   note: LINK_FIXES entry no longer matches the page: %s" % old)
+            continue
+        body = body.replace(old, new)
+        total += n
+        print("   %d link(s) rewritten -> %s" % (n, new))
+    return body, total
+
+
 def person_schema(body):
     """Describe the person behind the page in schema.org terms.
 
@@ -736,6 +771,7 @@ def main():
     body, n_pdf, n_cv = wire_pdf_links(body, papers, cv_path)
     body, n_poster = wire_posters(body, posters)
     body, n_moved, n_renamed = regroup_row_links(body)
+    body, _ = fix_links(body)
     body, n_tab = open_links_in_new_tab(body)
 
     if "x-dc" in body or "__bundler" in body:
