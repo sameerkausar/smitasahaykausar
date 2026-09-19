@@ -87,6 +87,21 @@ article.card[data-paper-ready]:focus-within {
 .poster-actions[hidden] { display: none; }        /* see the note above */
 .poster-actions { margin-top: 5px; }
 
+/* A row can offer the published abstract record, the hosted poster, or both.
+   They belong together under the venue rather than split between the date
+   gutter and the content cell, so unbundle.py moves the external one down
+   into this flex row. Abstract first, then poster. The poster half keeps its
+   own hidden wrapper, so a row with an abstract and no uploaded poster shows
+   just the one link and no empty gap. */
+.talk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+  margin-top: 5px;
+}
+.talk-actions .poster-actions { margin-top: 0; }
+
 .poster-a {
   font-family: var(--font-heading);
   font-size: 12px;
@@ -99,21 +114,36 @@ article.card[data-paper-ready]:focus-within {
 .poster-a::after { content: " \2197"; }
 .poster-a:hover { color: var(--color-accent-900); text-decoration: none; }
 
+/* The tint wants to bleed 12px into the gutters; the row must not move.
+   Doing that with a negative margin and matching padding fails twice over:
+   the row carries an inline `padding:14px 0` from the export that wins over
+   the stylesheet, and even with !important the row's border box still grows
+   by 24px, so the divider rule above a row with a hosted poster ran wider
+   than the rules around it. Painting the tint with a pseudo-element instead
+   leaves the row's geometry untouched, so every row in the section shares one
+   left edge and one rule width whether or not its poster is uploaded. */
 .talk-row[data-paper-ready] {
   cursor: pointer;
-  /* Pull the tint into the row's own gutters without shifting the text. */
-  margin-inline: -12px;
-  padding-inline: 12px;
-  transition: background-color .18s ease;
+  position: relative;
 }
-.talk-row[data-paper-ready]:hover,
-.talk-row[data-paper-ready]:focus-within {
+.talk-row[data-paper-ready]::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px;
+  background: transparent;
+  transition: background-color .18s ease;
+  pointer-events: none;
+}
+.talk-row[data-paper-ready]:hover::before,
+.talk-row[data-paper-ready]:focus-within::before {
   background: color-mix(in srgb, var(--color-accent-700) 7%, transparent);
 }
+/* Keep the text above the tint. */
+.talk-row[data-paper-ready] > * { position: relative; }
 
 @media (prefers-reduced-motion: reduce) {
   article.card[data-paper-ready],
-  .talk-row[data-paper-ready],
+  .talk-row[data-paper-ready]::before,
   .paper-read { transition: none; }
   article.card[data-paper-ready]:hover { transform: none; }
 }
@@ -129,6 +159,21 @@ article.card[data-paper-ready]:focus-within {
    Relative links are not matched, so the reader's own controls and the
    "View poster" / "Read paper" links -- which point at files in posters/ and
    papers/ -- keep the single arrow they already had and never get a second. */
+
+/* The same face the poster links wear, so every arrow link reads as one
+   family: condensed heading type, uppercase, letter-spaced, with a hairline
+   underline that is quieter than a browser default. */
+a[href^="http"]:not(.btn) {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-700);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  padding-bottom: 1px;
+}
+a[href^="http"]:not(.btn):hover { color: var(--color-accent-900); }
 
 a[href^="http"]:not(.btn)::after { content: "\00A0\2197"; }
 

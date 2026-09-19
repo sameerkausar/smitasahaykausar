@@ -328,8 +328,22 @@ def wire_posters(body, posters):
             continue
         title = html.unescape(m.group(1)).strip()
 
+        # Two rows can carry the same title -- "Purinergic System Perturbations
+        # in Schizophrenia" is both an invited talk at the University of Toledo
+        # and a poster at the Graduate Research Annual Forum. Matching on title
+        # alone attached the poster to whichever came first, which was the talk,
+        # and left the real poster row unwired. The venue in documents.json
+        # settles it: the row's venue line has to appear in the entry's venue.
+        vm = re.search(r'color:var\(--color-neutral-700\);margin-top:2px">([^<]*)<', row)
+        row_venue = html.unescape(vm.group(1)).strip().lower() if vm else ""
+
+        def fits(p):
+            venue = p.get("venue", "").lower()
+            return not (venue and row_venue) or row_venue in venue
+
         entry = next((p for p in posters
-                      if p["match"].lower() in title.lower() and p["slug"] not in used), None)
+                      if p["match"].lower() in title.lower()
+                      and p["slug"] not in used and fits(p)), None)
         if not entry:
             continue
         used.add(entry["slug"])
@@ -419,6 +433,115 @@ def wire_pdf_links(body, papers, cv_path):
     if 'href="#"' in body:
         print("   warning: a placeholder href=\"#\" link is still unresolved")
     return body, len(matched), n_cv
+
+
+def regroup_row_links(body):
+    """Put a talk row's abstract link beside its poster link, under the venue.
+
+    The export puts the published-record link ("Abstract", and on one row
+    "Poster") in the date gutter, while wire_posters puts the hosted PDF link
+    under the venue. A row offering both showed them in two different places
+    in two different faces. This moves the gutter link down into a single
+    actions row -- abstract first, then poster -- and gives it the same class
+    the poster link wears so the two match.
+
+    "Abstract" becomes "View abstract" to read alongside "View poster". Any
+    other label is left exactly as it is: the one row carrying an external
+    "Poster" record as well as a hosted PDF would read "Poster / View poster",
+    which needs a naming decision rather than a guess.
+
+    The poster half keeps its own hidden wrapper, so a row with an abstract
+    and no uploaded poster shows one link and no empty gap.
+    """
+    GUTTER = re.compile(
+        r'<div style="font-size:13\.5px;margin-top:4px">\s*'
+        r'(<a\b[^>]*href="https?://[^"]*"[^>]*>)(.*?)</a>\s*</div>', re.S)
+
+    moved = renamed = paired = 0
+    out, pos = [], 0
+    while True:
+        start = body.find('<div class="talk-row"', pos)
+        if start < 0:
+            break
+        end = _element_end(body, start)
+        if end is None:
+            break
+        out.append(body[pos:start])
+        row = body[start:end]
+        pos = end
+
+        m = GUTTER.search(row)
+        poster = re.search(r'<div class="poster-actions".*?</div>\s*</div>', row, re.S)
+        if not m or not poster:
+            out.append(row)
+            continue
+
+        open_tag, label = m.group(1), re.sub(r"<[^>]+>", "", m.group(2)).strip()
+        if label.lower() == "abstract":
+            label = "View abstract"
+            renamed += 1
+        # Drop the inline colour so .poster-a and the outbound-link rule win.
+        open_tag = re.sub(r'\s*style="[^"]*"', "", open_tag)
+        open_tag = open_tag.replace("<a ", '<a class="poster-a" ', 1)
+
+        row = row[:m.start()] + row[m.end():]          # lift it out of the gutter
+        poster = re.search(r'(<div class="poster-actions".*?</div>)', row, re.S)
+        if not poster:
+            out.append(row)
+            continue
+        paired += 1
+        moved += 1
+        row = (row[:poster.start(1)]
+               + '<div class="talk-actions">%s%s</a>%s</div>'
+                 % (open_tag, label, poster.group(1))
+               + row[poster.end(1):])
+        out.append(row)
+
+    out.append(body[pos:])
+    return "".join(out), moved, renamed
+
+
+def open_links_in_new_tab(body):
+    """Send every link that leaves the page to a new tab.
+
+    Two kinds qualify. Anything on another origin -- the DOI line on a
+    publication card, the Abstract and Poster records under talks, the
+    articles, the profile links -- and the two CV buttons, which point at a
+    PDF that would otherwise replace the site with a document and leave no
+    way back but the back button.
+
+    rel="noopener noreferrer" goes on with it. Without noopener the opened
+    page gets a handle on ours through window.opener and can navigate it
+    somewhere else while the reader is looking away, which is worth closing
+    off even for a DOI resolver.
+
+    Not touched: in-page anchors, and the "View poster" and "PDF" links,
+    which the reader and the download attribute already handle.
+
+    Done here rather than in custom.css because target is an attribute and
+    CSS cannot set one, and index.html is regenerated from each export --
+    a hand edit would not survive the next rebuild.
+    """
+    n = 0
+
+    def add(m):
+        nonlocal n
+        attrs = m.group(1)
+        if "target=" in attrs:
+            return m.group(0)
+        href = re.search(r'href="([^"]*)"', attrs)
+        if not href:
+            return m.group(0)
+        target = href.group(1)
+        external = target.startswith(("http://", "https://"))
+        is_cv = target.startswith("cv/")
+        if not (external or is_cv):
+            return m.group(0)
+        n += 1
+        return "<a%s target=\"_blank\" rel=\"noopener noreferrer\">" % attrs.rstrip()
+
+    body = re.sub(r"<a\b([^>]*)>", add, body)
+    return body, n
 
 
 def build_document(sticky, body):
@@ -522,6 +645,8 @@ def main():
     sticky, body = carve_body(template)
     body, n_pdf, n_cv = wire_pdf_links(body, papers, cv_path)
     body, n_poster = wire_posters(body, posters)
+    body, n_moved, n_renamed = regroup_row_links(body)
+    body, n_tab = open_links_in_new_tab(body)
 
     if "x-dc" in body or "__bundler" in body:
         fail("bundler scaffolding survived into the page body")
@@ -536,6 +661,9 @@ def main():
     print("  %2d bytes    -> assets/css/site.css" % n_css)
     print("  %2d paper slots, %d poster slots, %d CV buttons"
           % (n_pdf, n_poster, n_cv))
+    print("  %2d links open in a new tab" % n_tab)
+    print("  %2d abstract links moved beside their poster link (%d relabelled)"
+          % (n_moved, n_renamed))
     print("  regenerated papers/README.md")
     print("\ncustom.css, papers/ and cv/ were left untouched.")
 
