@@ -139,7 +139,13 @@ REVEAL_SCRIPT = """<script>
 
   function open(card) {
     var pdf = card.getAttribute('data-paper-pdf');
-    if (nativeInstead()) { window.open(pdf, '_blank', 'noopener'); return; }
+    /* Posters open in a new tab rather than the reader: a poster is one big
+       landscape sheet a reader wants to zoom around, which the browser's own
+       viewer does better than an iframe. Papers keep the reader. */
+    if (card.classList.contains('talk-row') || nativeInstead()) {
+      window.open(pdf, '_blank', 'noopener');
+      return;
+    }
 
     lastFocus = document.activeElement;
     titleEl.textContent = card.getAttribute('data-paper-title') || 'Paper';
@@ -352,7 +358,7 @@ def wire_posters(body, posters):
         pdf = "posters/%s.pdf" % entry["slug"]
 
         affordance = ('<div class="poster-actions" data-pdf hidden>'
-                      '<a href="%s" class="poster-a">View poster</a></div>' % pdf)
+                      '<a href="%s" class="poster-a" target="_blank" rel="noopener noreferrer">View poster</a></div>' % pdf)
         # The row is [date cell][content cell]; put the affordance at the end of
         # the content cell so it sits under the venue rather than in the gutter.
         insert_at = row.rindex("</div>", 0, row.rindex("</div>"))
