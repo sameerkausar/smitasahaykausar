@@ -22,6 +22,7 @@ Never touches assets/css/custom.css, papers/, cv/ or tools/.
 import base64
 import gzip
 import html
+import datetime
 import json
 import os
 import re
@@ -544,7 +545,74 @@ def open_links_in_new_tab(body):
     return body, n
 
 
-def build_document(sticky, body):
+def person_schema(body):
+    """Describe the person behind the page in schema.org terms.
+
+    A name query is an entity question before it is a keyword one: Google has
+    to decide that this domain and the Smita Sahay-Kausar with an ORCID, a
+    Scholar profile and a LinkedIn are one person. sameAs is how a site claims
+    that, and it only counts when the profiles point back -- see the SEO notes
+    in README.md.
+
+    The profile URLs are read out of the page rather than hard-coded here, so
+    they cannot drift from what the contact section actually links to.
+    """
+    def find(host):
+        m = re.search(r'href="(https?://[^"]*%s[^"]*)"' % re.escape(host), body)
+        return m.group(1) if m else None
+
+    same = [u for u in (find("linkedin.com/in/"),
+                        find("scholar.google.com/citations"),
+                        find("orcid.org/")) if u]
+    orcid = find("orcid.org/")
+
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Smita Sahay-Kausar",
+        "givenName": "Smita",
+        "familyName": "Sahay-Kausar",
+        "url": SITE_URL,
+        "image": SITE_URL + "assets/img/portrait.jpg",
+        "jobTitle": "M.D. Candidate, Ph.D.",
+        "description": PAGE_DESC,
+        "alumniOf": {
+            "@type": "CollegeOrUniversity",
+            "name": "University of Toledo College of Medicine and Life Sciences",
+        },
+        "affiliation": {
+            "@type": "CollegeOrUniversity",
+            "name": "University of Toledo College of Medicine and Life Sciences",
+        },
+        "knowsAbout": [
+            "Neuroscience", "Bioinformatics", "Psychiatry",
+            "Otolaryngology-Head and Neck Surgery", "Physician-scientist training",
+        ],
+    }
+    if orcid:
+        data["identifier"] = {"@type": "PropertyValue",
+                              "propertyID": "ORCID", "value": orcid}
+    if same:
+        data["sameAs"] = same
+    return ('<script type="application/ld+json">%s</script>'
+            % json.dumps(data, ensure_ascii=False, separators=(",", ":")))
+
+
+def write_sitemap():
+    """One URL, because it is one page. Written here so lastmod tracks rebuilds."""
+    today = datetime.date.today().isoformat()
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           '  <url>\n'
+           '    <loc>%s</loc>\n'
+           '    <lastmod>%s</lastmod>\n'
+           '  </url>\n'
+           '</urlset>\n' % (SITE_URL, today))
+    open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8").write(xml)
+    return today
+
+
+def build_document(sticky, body, schema):
     return """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -561,7 +629,13 @@ def build_document(sticky, body):
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}">
 <meta property="og:image" content="{url}assets/img/portrait.jpg">
+<meta property="og:image:alt" content="Smita Sahay-Kausar">
+<meta property="og:site_name" content="Smita Sahay-Kausar">
+<meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{url}assets/img/portrait.jpg">
+
+{schema}
 
 <link rel="preload" href="assets/fonts/barlow-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/barlow-condensed-600-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -578,7 +652,7 @@ def build_document(sticky, body):
 </body>
 </html>
 """.format(title=PAGE_TITLE, desc=PAGE_DESC, url=SITE_URL, sticky=sticky,
-           body=body, reader=READER_MARKUP, reveal=REVEAL_SCRIPT)
+           schema=schema, body=body, reader=READER_MARKUP, reveal=REVEAL_SCRIPT)
 
 
 def write_papers_readme(papers):
@@ -652,8 +726,9 @@ def main():
         fail("bundler scaffolding survived into the page body")
 
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(
-        build_document(sticky, body))
+        build_document(sticky, body, person_schema(body)))
     write_papers_readme(papers)
+    stamp = write_sitemap()
 
     print("rebuilt index.html")
     print("  %2d images   -> assets/img/" % n_img)
@@ -665,6 +740,7 @@ def main():
     print("  %2d abstract links moved beside their poster link (%d relabelled)"
           % (n_moved, n_renamed))
     print("  regenerated papers/README.md")
+    print("     Person schema in the head, sitemap.xml lastmod %s" % stamp)
     print("\ncustom.css, papers/ and cv/ were left untouched.")
 
 
