@@ -452,10 +452,11 @@ def regroup_row_links(body):
     actions row -- abstract first, then poster -- and gives it the same class
     the poster link wears so the two match.
 
-    "Abstract" becomes "View abstract" to read alongside "View poster". Any
-    other label is left exactly as it is: the one row carrying an external
-    "Poster" record as well as a hosted PDF would read "Poster / View poster",
-    which needs a naming decision rather than a guess.
+    "Abstract" becomes "View abstract" to read alongside "View poster". A
+    gutter link labelled "Poster" is dropped instead of moved: it points at
+    the published record of the poster we already host, and two links a word
+    apart pointing at the same work is a choice a reader should not have to
+    make.
 
     The poster half keeps its own hidden wrapper, so a row with an abstract
     and no uploaded poster shows one link and no empty gap.
@@ -464,7 +465,7 @@ def regroup_row_links(body):
         r'<div style="font-size:13\.5px;margin-top:4px">\s*'
         r'(<a\b[^>]*href="https?://[^"]*"[^>]*>)(.*?)</a>\s*</div>', re.S)
 
-    moved = renamed = paired = 0
+    moved = renamed = paired = dropped = 0
     out, pos = [], 0
     while True:
         start = body.find('<div class="talk-row"', pos)
@@ -484,6 +485,20 @@ def regroup_row_links(body):
             continue
 
         open_tag, label = m.group(1), re.sub(r"<[^>]+>", "", m.group(2)).strip()
+
+        # A gutter link labelled "Poster" points at the published record of the
+        # same poster we host ourselves -- the F1000Research entry for the
+        # Sex-Specific MDD row. Two links a word apart, "Poster" and "View
+        # poster", pointing at the same work, is a choice a reader should not
+        # have to make. We serve the file, so ours is the one that stays and
+        # the record link is dropped. An "Abstract" is a different artifact --
+        # the published abstract, not the poster -- and is kept.
+        if label.lower() == "poster":
+            row = row[:m.start()] + row[m.end():]
+            out.append(row)
+            dropped += 1
+            continue
+
         if label.lower() == "abstract":
             label = "View abstract"
             renamed += 1
@@ -505,7 +520,7 @@ def regroup_row_links(body):
         out.append(row)
 
     out.append(body[pos:])
-    return "".join(out), moved, renamed
+    return "".join(out), moved, renamed, dropped
 
 
 def open_links_in_new_tab(body):
@@ -725,7 +740,7 @@ def main():
     sticky, body = carve_body(template)
     body, n_pdf, n_cv = wire_pdf_links(body, papers, cv_path)
     body, n_poster = wire_posters(body, posters)
-    body, n_moved, n_renamed = regroup_row_links(body)
+    body, n_moved, n_renamed, n_dropped = regroup_row_links(body)
     body, n_tab = open_links_in_new_tab(body)
 
     if "x-dc" in body or "__bundler" in body:
@@ -745,6 +760,8 @@ def main():
     print("  %2d links open in a new tab" % n_tab)
     print("  %2d abstract links moved beside their poster link (%d relabelled)"
           % (n_moved, n_renamed))
+    if n_dropped:
+        print("  %2d duplicate \"Poster\" record link(s) dropped" % n_dropped)
     print("  regenerated papers/README.md")
     print("     Person schema in the head, sitemap.xml lastmod %s" % stamp)
     print("\ncustom.css, papers/ and cv/ were left untouched.")
