@@ -5,9 +5,9 @@ name: Check PDF filenames
 
 on:
   push:
-    paths: ['posters/**', 'papers/**', 'cv/**', 'tools/documents.json']
+    paths: ['posters/**', 'papers/**', 'cv/**', 'photos/**', 'tools/documents.json']
   pull_request:
-    paths: ['posters/**', 'papers/**', 'cv/**', 'tools/documents.json']
+    paths: ['posters/**', 'papers/**', 'cv/**', 'photos/**', 'tools/documents.json']
   workflow_dispatch:
 
 jobs:

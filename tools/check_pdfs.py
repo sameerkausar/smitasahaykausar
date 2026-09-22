@@ -6,6 +6,9 @@ tools/documents.json gives it, so a misspelled filename fails silently: the
 upload succeeds and no link ever appears. This turns that into a loud failure
 that names the correct filename.
 
+The same goes for full-size photos in photos/: the About photo viewer uses one
+only when its filename matches the thumbnail it replaces in assets/img/.
+
 Run it yourself with `python3 tools/check_pdfs.py`; CI runs it on every push.
 """
 
@@ -53,6 +56,36 @@ def main():
             problems.append("cv/%s will not be linked.\n    Rename it to:  %s"
                             % (name, os.path.basename(cv_path)))
 
+    # Full-size originals for the About photo strip. Each one replaces the
+    # thumbnail of the same name in assets/img/; the portrait is not in the
+    # strip, so it has no viewer to feed.
+    photo_dir = os.path.join(ROOT, "photos")
+    if os.path.isdir(photo_dir):
+        img_dir = os.path.join(ROOT, "assets/img")
+        expected = sorted(f for f in os.listdir(img_dir)
+                          if f.endswith(".jpg") and f != "portrait.jpg")
+        present = sorted(f for f in os.listdir(photo_dir)
+                         if not f.startswith(".") and f.lower() != "readme.md")
+        for name in present:
+            if name in expected:
+                size = os.path.getsize(os.path.join(photo_dir, name))
+                if size > 3 * 1024 * 1024:
+                    print("note: photos/%s is %.1f MB -- it works, but will be slow "
+                          "on a phone. About 2000px on the long side is plenty."
+                          % (name, size / 1048576.0))
+                continue
+            close = difflib.get_close_matches(name.lower(), expected, n=1, cutoff=0.6)
+            if close:
+                problems.append("photos/%s will not be used.\n    Rename it to:  %s"
+                                % (name, close[0]))
+            else:
+                problems.append(
+                    "photos/%s does not match any photo in the About strip.\n"
+                    "    Name it after the thumbnail it replaces: %s"
+                    % (name, ", ".join(expected)))
+        used = [n for n in present if n in expected]
+        summary.append(("photos", len(present), used, len(expected) - len(used)))
+
     for folder, n, linked, missing in summary:
         print("%s/: %d present, %d correctly named" % (folder, n, len(linked)))
         for name in linked:
@@ -66,7 +99,7 @@ def main():
             print("  * %s\n" % p)
         return 1
 
-    print("\nEvery hosted PDF is named correctly.")
+    print("\nEvery hosted PDF and photo is named correctly.")
     return 0
 
 
