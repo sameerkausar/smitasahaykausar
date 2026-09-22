@@ -1248,7 +1248,13 @@
    or a click on the backdrop returns to exactly where the reader was.
 
    Wired entirely from here, off the <figure> elements the export already
-   has, so a fresh export needs no markup changes to keep it working. */
+   has, so a fresh export needs no markup changes to keep it working.
+
+   The export ships each photo as a 520px square crop. A full-size original
+   dropped into photos/ under the same filename (photos/paris.jpg for
+   assets/img/paris.jpg) is shown instead, uncropped. Each is probed once
+   with a HEAD request, like the PDFs, so a photo without an original simply
+   falls back to the square and nothing ever breaks. */
 (function () {
   'use strict';
 
@@ -1275,6 +1281,16 @@
     };
     var index = photos.push(photo) - 1;
 
+    var full = 'photos/' + photo.src.split('/').pop();
+    if (typeof fetch === 'function') {
+      fetch(full, { method: 'HEAD' })
+        .then(function (r) {
+          var type = r.headers.get('content-type') || '';
+          if (r.ok && type.indexOf('image/') === 0) { photo.full = full; }
+        })
+        .catch(function () { /* no original: the square it is */ });
+    }
+
     /* The tile is a div, so make it reachable and operable from a keyboard. */
     tile.classList.add('photo-tile');
     tile.setAttribute('role', 'button');
@@ -1291,10 +1307,15 @@
   function show(i) {
     current = (i + photos.length) % photos.length;
     var p = photos[current];
-    img.src = p.src;
+    img.src = p.full || p.src;
     img.alt = p.alt;
     cap.textContent = p.caption;
     count.textContent = photos.length > 1 ? (current + 1) + ' / ' + photos.length : '';
+    /* Fetch the neighbours now, so stepping through originals is instant. */
+    [current - 1, current + 1].forEach(function (j) {
+      var n = photos[(j + photos.length) % photos.length];
+      if (n.full && !n.preloaded) { new Image().src = n.full; n.preloaded = true; }
+    });
   }
 
   function open(i) {

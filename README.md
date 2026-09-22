@@ -15,6 +15,7 @@ assets/img/             portrait, photo strip, favicon
 posters/                posters and slide decks  -> posters/README.md
 papers/                 manuscript PDFs          -> papers/README.md
 cv/                     smita-sahay-kausar-cv.pdf
+photos/                 full-size originals for the About photo strip
 tools/documents.json    which PDF belongs to which card or row
 tools/unbundle.py       rebuilds the site from a Claude Design export
 tools/check_pdfs.py     flags a PDF that is named wrong
@@ -90,7 +91,10 @@ as it appears on the page — then rerun `tools/unbundle.py` (below). It wires t
 ## The photo strip
 
 Clicking a photo in About opens it large over the page with its caption
-beneath; arrow keys or a swipe step through the set. The viewer reads the
+beneath; arrow keys or a swipe step through the set. The strip itself uses the
+520px squares from the export; drop a full-size original into **`photos/`**
+under the same filename and the viewer shows that instead, uncropped — see
+[`photos/README.md`](photos/README.md) for the names. The viewer reads the
 photo and its caption straight from the export's `<figure>` elements, so a
 photo added, removed or recaptioned in Claude Design shows up in the viewer
 with no other change. Markup and script are injected by `tools/unbundle.py`;
@@ -109,7 +113,7 @@ python3 tools/unbundle.py ~/Downloads/new-export.html
 ```
 
 It rewrites `index.html`, `assets/css/site.css`, `assets/fonts/` and `assets/img/`,
-and leaves `custom.css`, `posters/`, `papers/`, `cv/` and `tools/` alone. Check what changed
+and leaves `custom.css`, `posters/`, `papers/`, `cv/`, `photos/` and `tools/` alone. Check what changed
 with `git diff`, preview locally, then commit.
 
 So: **design changes go through Claude Design and a rebuild. Styling fixes go in

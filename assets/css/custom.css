@@ -313,9 +313,9 @@ html.reader-open { overflow: hidden; }              /* stop the page behind scro
 
 /* === Photo viewer ========================================================
    The five-photo strip in About. Clicking a thumbnail shows it large over
-   the page with its caption beneath. The export ships these photos as
-   520px squares, so that is the size and crop the viewer has to work with;
-   it never upscales past it. Same backdrop and Close button as the paper
+   the page with its caption beneath. It shows the full-size original from
+   photos/ when there is one, and otherwise the export's 520px square; either
+   way it fits the screen and never upscales a photo past its own size. Same backdrop and Close button as the paper
    reader, so the two read as one family. Wired by the script at the bottom
    of index.html. */
 
