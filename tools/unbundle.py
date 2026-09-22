@@ -10,6 +10,7 @@ re-applies everything the export does not carry:
   * the PDF links on each publication card, from tools/documents.json
   * the CV links on the hero and contact buttons
   * the <link> to assets/css/custom.css, which is hand-maintained
+  * the enlarged photo view for the About photo strip
   * page title, description, canonical and Open Graph tags
 
 Usage:
@@ -93,6 +94,136 @@ READER_MARKUP = """
     <iframe class="reader-frame" id="reader-frame" title="" src="about:blank"></iframe>
   </div>
 </div>"""
+
+LIGHTBOX_MARKUP = """
+<!-- Enlarged view of a photo from the About strip, with its caption. Injected
+     by tools/unbundle.py; styled in assets/css/custom.css. -->
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-labelledby="lightbox-caption">
+  <button class="reader-btn reader-close lightbox-close" id="lightbox-close" type="button">Close</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous photo">&#8249;</button>
+  <figure class="lightbox-figure">
+    <img class="lightbox-img" id="lightbox-img" alt="">
+    <figcaption class="lightbox-caption">
+      <span id="lightbox-caption"></span>
+      <span class="lightbox-count" id="lightbox-count"></span>
+    </figcaption>
+  </figure>
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="Next photo">&#8250;</button>
+</div>"""
+
+LIGHTBOX_SCRIPT = """<script>
+/* The photo strip in About. Each thumbnail is a square crop with a small
+   caption under it; clicking one opens the whole photo over the page with
+   its caption beneath. Arrows (or a swipe) step through the set; Esc, Close
+   or a click on the backdrop returns to exactly where the reader was.
+
+   Wired entirely from here, off the <figure> elements the export already
+   has, so a fresh export needs no markup changes to keep it working. */
+(function () {
+  'use strict';
+
+  var box = document.getElementById('lightbox');
+  if (!box) { return; }
+  var img = document.getElementById('lightbox-img');
+  var cap = document.getElementById('lightbox-caption');
+  var count = document.getElementById('lightbox-count');
+  var photos = [];
+  var current = 0;
+  var lastFocus = null;
+
+  Array.prototype.forEach.call(document.querySelectorAll('figure'), function (fig) {
+    if (box.contains(fig)) { return; }
+    var pic = fig.querySelector('img');
+    if (!pic) { return; }
+    var fc = fig.querySelector('figcaption');
+    var tile = pic.parentNode;
+    var photo = {
+      src: pic.getAttribute('src'),
+      alt: pic.getAttribute('alt') || '',
+      caption: (fc ? fc.textContent : pic.getAttribute('alt') || '').trim(),
+      tile: tile
+    };
+    var index = photos.push(photo) - 1;
+
+    /* The tile is a div, so make it reachable and operable from a keyboard. */
+    tile.classList.add('photo-tile');
+    tile.setAttribute('role', 'button');
+    tile.setAttribute('tabindex', '0');
+    tile.setAttribute('aria-label', 'Enlarge photo: ' + (photo.alt || photo.caption));
+    tile.addEventListener('click', function () { open(index); });
+    tile.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(index); }
+    });
+  });
+  if (!photos.length) { return; }
+  if (photos.length < 2) { box.classList.add('lightbox-single'); }
+
+  function show(i) {
+    current = (i + photos.length) % photos.length;
+    var p = photos[current];
+    img.src = p.src;
+    img.alt = p.alt;
+    cap.textContent = p.caption;
+    count.textContent = photos.length > 1 ? (current + 1) + ' / ' + photos.length : '';
+  }
+
+  function open(i) {
+    lastFocus = document.activeElement;
+    show(i);
+    box.hidden = false;
+    document.documentElement.classList.add('reader-open');
+    document.getElementById('lightbox-close').focus();
+  }
+
+  function close() {
+    if (box.hidden) { return; }
+    box.hidden = true;
+    document.documentElement.classList.remove('reader-open');
+    /* Back to the tile for the photo last shown, not the one first opened. */
+    var back = photos[current].tile || lastFocus;
+    if (back && back.focus) { back.focus(); }
+  }
+
+  box.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.closest('#lightbox-close')) { close(); return; }
+    if (t.closest('#lightbox-prev')) { show(current - 1); return; }
+    if (t.closest('#lightbox-next')) { show(current + 1); return; }
+    /* Anything that is not the photo or its caption is backdrop. */
+    if (!t.closest('.lightbox-img') && !t.closest('.lightbox-caption')) { close(); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (box.hidden) { return; }
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'ArrowLeft') { show(current - 1); return; }
+    if (e.key === 'ArrowRight') { show(current + 1); return; }
+    if (e.key !== 'Tab') { return; }
+    /* Keep focus inside the dialog while it is open. */
+    var f = Array.prototype.filter.call(box.querySelectorAll('button'),
+      function (b) { return b.offsetParent !== null; });
+    if (!f.length) { return; }
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  /* A horizontal swipe on a phone steps through the set. */
+  var startX = null, startY = null;
+  box.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { startX = null; return; }
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  box.addEventListener('touchend', function (e) {
+    if (startX === null) { return; }
+    var dx = e.changedTouches[0].clientX - startX;
+    var dy = e.changedTouches[0].clientY - startY;
+    startX = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { show(current + (dx < 0 ? 1 : -1)); }
+  });
+})();
+</script>"""
 
 REVEAL_SCRIPT = """<script>
 /* Two jobs.
@@ -698,12 +829,16 @@ def build_document(sticky, body, schema):
 
 {body}
 {reader}
+{lightbox}
 
 {reveal}
+
+{lightbox_script}
 </body>
 </html>
 """.format(title=PAGE_TITLE, desc=PAGE_DESC, url=SITE_URL, sticky=sticky,
-           schema=schema, body=body, reader=READER_MARKUP, reveal=REVEAL_SCRIPT)
+           schema=schema, body=body, reader=READER_MARKUP, reveal=REVEAL_SCRIPT,
+           lightbox=LIGHTBOX_MARKUP, lightbox_script=LIGHTBOX_SCRIPT)
 
 
 def write_papers_readme(papers):

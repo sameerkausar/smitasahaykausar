@@ -87,6 +87,15 @@ Add an entry to [`tools/documents.json`](tools/documents.json) under `posters` o
 as it appears on the page — then rerun `tools/unbundle.py` (below). It wires the link and regenerates
 `papers/README.md`.
 
+## The photo strip
+
+Clicking a photo in About opens it large over the page with its caption
+beneath; arrow keys or a swipe step through the set. The viewer reads the
+photo and its caption straight from the export's `<figure>` elements, so a
+photo added, removed or recaptioned in Claude Design shows up in the viewer
+with no other change. Markup and script are injected by `tools/unbundle.py`;
+styling is in `custom.css`.
+
 ## Updating the design
 
 Smita builds the page in Claude Design. Each export is a single self-extracting

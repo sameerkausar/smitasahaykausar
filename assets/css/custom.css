@@ -311,6 +311,128 @@ html.reader-open { overflow: hidden; }              /* stop the page behind scro
 }
 
 
+/* === Photo viewer ========================================================
+   The five-photo strip in About. Clicking a thumbnail shows it large over
+   the page with its caption beneath. The export ships these photos as
+   520px squares, so that is the size and crop the viewer has to work with;
+   it never upscales past it. Same backdrop and Close button as the paper
+   reader, so the two read as one family. Wired by the script at the bottom
+   of index.html. */
+
+.photo-tile { cursor: zoom-in; }
+.photo-tile img { transition: transform .3s ease; }
+.photo-tile:hover img { transform: scale(1.05); }
+.photo-tile:focus-visible {
+  outline: 2px solid var(--color-accent-700);
+  outline-offset: 2px;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 24px 24px;
+  background: var(--color-accent-900);
+}
+.lightbox[hidden] { display: none; }
+
+.lightbox-close { position: absolute; top: 14px; right: 20px; }
+
+.lightbox-figure {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightbox-img {
+  display: block;
+  max-width: min(1100px, 100%);
+  max-height: calc(100vh - 150px);
+  max-height: calc(100dvh - 150px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 35%);
+}
+
+.lightbox-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  margin-top: 14px;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  color: var(--color-neutral-100);
+}
+.lightbox-count {
+  flex: none;
+  font-size: 12.5px;
+  letter-spacing: 0.16em;
+  color: var(--color-accent-300);
+}
+
+.lightbox-nav {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--color-neutral-100);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #f5f5f8 32%, transparent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+.lightbox-nav:hover {
+  background: color-mix(in srgb, #f5f5f8 14%, transparent);
+  border-color: color-mix(in srgb, #f5f5f8 55%, transparent);
+}
+.lightbox-single .lightbox-nav { display: none; }
+
+.lightbox-nav:focus-visible {
+  outline: 2px solid var(--color-neutral-100);
+  outline-offset: 2px;
+}
+
+/* On a phone the arrows would steal a third of the width. Float them over
+   the photo's edges instead; swiping also works. */
+@media (max-width: 700px) {
+  .lightbox { padding: 60px 12px 16px; }
+  .lightbox-close { top: 12px; right: 12px; }
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    font-size: 28px;
+    background: color-mix(in srgb, var(--color-accent-900) 55%, transparent);
+  }
+  .lightbox-prev { left: 8px; }
+  .lightbox-next { right: 8px; }
+  .lightbox-caption { font-size: 13.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-tile img, .lightbox-nav { transition: none; }
+  .photo-tile:hover img { transform: none; }
+}
+
 /* === Responsive corrections ==============================================
    The export has no media queries at all; these are all ours. */
 
