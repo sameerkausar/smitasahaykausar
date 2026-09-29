@@ -120,6 +120,29 @@ So: **design changes go through Claude Design and a rebuild. Styling fixes go in
 `custom.css`. Never edit `index.html` or `site.css` by hand** — the next rebuild
 discards them.
 
+### Where the site intentionally differs from the Claude Design export
+
+Smita's export has not been updated to match these yet. The site is right and
+the export is stale: do not "fix" them back, and if a rebuild undoes one,
+re-apply it.
+
+**Yoga photo (About strip).** The correct photo is the crow-pose frame, the
+one now in `photos/yoga.jpg`, captioned **"Crow pose in yoga class"**. The
+export still has the old frame and the caption "Frog pose in yoga class".
+
+- The caption is kept by `TEXT_FIXES` in `tools/unbundle.py`, so a rebuild
+  preserves it.
+- The strip thumbnail, `assets/img/yoga.jpg`, is **not** preserved: every
+  rebuild overwrites it with the export's old frame. After running
+  `unbundle.py`, regenerate it from the full-size photo:
+
+  ```sh
+  python3 -c "from PIL import Image, ImageOps; ImageOps.fit(Image.open('photos/yoga.jpg').convert('RGB'), (520, 520), Image.LANCZOS).save('assets/img/yoga.jpg', quality=85, optimize=True)"
+  ```
+
+- To retire all of this, swap the photo and retitle the caption in Claude
+  Design, export again, then delete the `TEXT_FIXES` entry and this note.
+
 ## Publishing with GitHub Pages
 
 1. **Settings → Pages**.

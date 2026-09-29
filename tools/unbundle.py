@@ -63,8 +63,17 @@ IMG_NAMES = {
     "White Coat Ceremony": "white-coat-ceremony.jpg",
     "Hike to Silver Lake in Utah": "silver-lake-utah.jpg",
     "Frog pose in yoga class": "yoga.jpg",
+    "Crow pose in yoga class": "yoga.jpg",
     "Biking through Paris": "paris.jpg",
     "Top of Rainbow Mountain, Peru": "rainbow-mountain-peru.jpg",
+}
+
+# Wording changed after the export was made, applied to the page text and alt
+# text. Same rule as LINK_FIXES: temporary. Correct it in Claude Design too,
+# then drop the entry. The build prints every substitution it makes.
+TEXT_FIXES = {
+    # The new photo is a crow pose, not the frog pose the export captions.
+    "Frog pose in yoga class": "Crow pose in yoga class",
 }
 
 # Defaults declared by the export's design-component props block. The runtime
@@ -730,6 +739,18 @@ def open_links_in_new_tab(body):
     return body, n
 
 
+def fix_text(body):
+    """Apply TEXT_FIXES to the page."""
+    for old, new in TEXT_FIXES.items():
+        n = body.count(old)
+        if not n:
+            print("   note: TEXT_FIXES entry no longer matches the page: %s" % old)
+            continue
+        body = body.replace(old, new)
+        print("   %d text fix(es) -> %s" % (n, new))
+    return body
+
+
 def fix_links(body):
     """Apply LINK_FIXES to the page before anything reads a URL out of it.
 
@@ -928,6 +949,7 @@ def main():
     body, n_poster = wire_posters(body, posters)
     body, n_moved, n_renamed = regroup_row_links(body)
     body, _ = fix_links(body)
+    body = fix_text(body)
     body, n_tab = open_links_in_new_tab(body)
 
     if "x-dc" in body or "__bundler" in body:
