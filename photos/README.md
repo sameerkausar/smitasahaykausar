@@ -11,7 +11,7 @@ The filename has to match the thumbnail exactly: all lowercase, `.jpg`.
 |---|---|
 | White Coat Ceremony | `white-coat-ceremony.jpg` |
 | Hike to Silver Lake, Utah | `silver-lake-utah.jpg` |
-| Crow pose in yoga class | `yoga.jpg` |
+| Crow pose in yoga class (the export still says "Frog"; see the main README) | `yoga.jpg` |
 | Biking through Paris | `paris.jpg` |
 | Rainbow Mountain, Peru | `rainbow-mountain-peru.jpg` |
 
