@@ -11,7 +11,7 @@ index.html              the page            (generated — do not hand-edit)
 assets/css/site.css     design system       (generated — do not hand-edit)
 assets/css/custom.css   our own CSS + the reader  (hand-maintained)
 assets/fonts/           Barlow + Barlow Condensed, self-hosted
-assets/img/             portrait, photo strip, favicon
+assets/img/             portrait, photo strip, favicon (SVG + PNGs; ICO at repo root)
 posters/                posters and slide decks  -> posters/README.md
 papers/                 manuscript PDFs          -> papers/README.md
 cv/                     smita-sahay-kausar-cv.pdf

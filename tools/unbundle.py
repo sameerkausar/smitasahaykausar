@@ -845,7 +845,10 @@ def build_document(sticky, body, schema):
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <meta name="author" content="Smita Sahay-Kausar">
-<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/img/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="canonical" href="{url}">
 
 <meta property="og:type" content="profile">
